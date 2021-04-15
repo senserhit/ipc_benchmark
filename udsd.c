@@ -19,7 +19,7 @@ getdetlatimeofday(struct timeval *begin, struct timeval *end)
 
 int main(int argc, char *argv[])
 {
-    int fd, nfd;
+    int fd;
     long i, size, count, sum, n;
     char *buf;
     size_t len;
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
     if (argc != 3)
     {
-        printf("usage: ./uds <size> <count>\n");
+        printf("usage: ./udsd <size> <count>\n");
         return 1;
     }
 
@@ -38,12 +38,12 @@ int main(int argc, char *argv[])
 
     memset(&un, 0, sizeof(un));
     if (fork() == 0)
-    {
-        fd = socket(AF_UNIX, SOCK_STREAM, 0);
-        unlink("./uds-ipc");
+    {        
+        fd = socket(AF_UNIX, SOCK_DGRAM, 0);
+        unlink("./udsd-ipc");
         un.sun_family = AF_UNIX;
-        strcpy(un.sun_path, "./uds-ipc");
-        len = offsetof(struct sockaddr_un, sun_path) + strlen("./uds-ipc");
+        strcpy(un.sun_path, "./udsd-ipc");
+        len = offsetof(struct sockaddr_un, sun_path) + strlen("./udsd-ipc");
 
         if (bind(fd, (struct sockaddr *)&un, len) == -1)
         {
@@ -51,21 +51,10 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        if (listen(fd, 128) == -1)
-        {
-            perror("listen");
-            return 1;
-        }
-
-        if ((nfd = accept(fd, NULL, NULL)) == -1)
-        {
-            perror("accept");
-            return 1;
-        }
         sum = 0;
-        for (;;)
-        {
-            n = read(nfd, buf, size);
+
+        for (i = 0; i < count; i++) {
+            n = recvfrom(fd, buf, size, 0,NULL,NULL);
             if (n == 0)
             {
                 break;
@@ -77,7 +66,7 @@ int main(int argc, char *argv[])
             }
             sum += n;
         }
-
+        
         if (sum != count * size)
         {
             fprintf(stderr, "sum error: %ld != %ld\n", sum, count * size);
@@ -88,23 +77,17 @@ int main(int argc, char *argv[])
     {
         sleep(1);
 
-        fd = socket(AF_UNIX, SOCK_STREAM, 0);
+        fd = socket(AF_UNIX, SOCK_DGRAM, 0);
         un.sun_family = AF_UNIX;
-        strcpy(un.sun_path, "./uds-ipc");
-        len = offsetof(struct sockaddr_un, sun_path) + strlen("./uds-ipc");
-        if (connect(fd, (struct sockaddr *)&un, len) == -1)
-        {
-            perror("connect");
-            return 1;
-        }
+        strcpy(un.sun_path, "./udsd-ipc");
+        len = offsetof(struct sockaddr_un, sun_path) + strlen("./udsd-ipc");
 
         gettimeofday(&begin, NULL);
 
         for (i = 0; i < count; i++)
-        {        
-            if (write(fd, buf, size) != size)
-            {
-                perror("wirte");
+        {
+            if (sendto(fd, buf, size, 0, (struct sockaddr *)&un, len) != size) {
+                perror("sendto");
                 return 1;
             }
         }

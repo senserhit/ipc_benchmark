@@ -1,9 +1,10 @@
 #! /bin/sh
 
 # Tests file binaries and test sizes
-ipc_tests="pipe fifo socketpair uds tcp udp shm"
+#ipc_tests="pipe fifo socketpair uds tcp udp shm"
+ipc_tests="uds tcp udp udsd"
 ipc_sizes="128 256 512 1024 2048"
-ipc_count=10000
+ipc_count=1000000
 
 # Write to log file, keeps echo parameters
 write_log()
@@ -38,7 +39,7 @@ do
     write_log "${test}"
 
     # Headers
-    write_log "$(echo ${ipc_sizes} | tr [:space:] '|')"
+    write_log "$(echo -e '\t'${ipc_sizes} | tr [:space:] '|')"
 
     # Benchmark's actual data
     for tsize in ${ipc_sizes}

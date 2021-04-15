@@ -39,7 +39,10 @@ uds
 tcp
 udp
 shm
+udpcs
+udsd
 
 fifo-ipc
 uds-ipc
+udsd-ipc
 

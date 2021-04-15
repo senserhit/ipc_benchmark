@@ -25,22 +25,25 @@ int main(int argc, char *argv[]) {
     struct timeval       begin, end;
     struct sockaddr_in   in;
 
-    if (argc != 3) {
-        printf("usage: ./udp <size> <count>\n");
+    if (argc != 5) {
+        printf("usage: ./udp <size> <count> <ip> <C|S>\n");
         return 1;
     }
 
     size = atoi(argv[1]);
     count = atoi(argv[2]);
+    char * ip = argv[3];
+    char * mode = argv[4];
     buf = malloc(size);
 
     memset(&in, 0, sizeof(in));
-    if (fork() == 0) { // parent
+    if (strcmp(mode, "S") == 0)
+    {
         fd = socket(AF_INET, SOCK_DGRAM, 0);
 
         in.sin_family = AF_INET;
         in.sin_port = htons(15323);
-        inet_pton(AF_INET, "127.0.0.1", &in.sin_addr);
+        inet_pton(AF_INET, ip, &in.sin_addr);
 
         yes = 1;
         setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
@@ -52,7 +55,7 @@ int main(int argc, char *argv[]) {
 
         sum = 0;
         for (i = 0; i < count; i++) {
-            n = recv(fd, buf, size, 0);
+            n = recvfrom(fd, buf, size, 0,NULL, NULL);
             if (n == 0) {
                 break;
             }
@@ -67,18 +70,14 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         close(fd);
-    } else {
-        sleep(1);
+    } 
+    else 
+    {
 
         fd = socket(AF_INET, SOCK_DGRAM, 0);
-        if (fd > 0)
-        {
-            perror("socket");
-        }
-
         in.sin_family = AF_INET;
         in.sin_port = htons(15323);
-        inet_pton(AF_INET, "127.0.0.1", &in.sin_addr);
+        inet_pton(AF_INET, ip, &in.sin_addr);
 
         gettimeofday(&begin, NULL);
 

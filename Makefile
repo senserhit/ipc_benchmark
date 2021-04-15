@@ -1,6 +1,6 @@
 CC := gcc
 CFLAGS := -g -Wall
-TARGET := pipe fifo socketpair uds tcp udp shm
+TARGET := pipe fifo socketpair uds udsd tcp udp shm udpcs
 
 # Background color
 GREEN  				:= $(shell tput -Txterm setaf 2)
@@ -52,6 +52,11 @@ socketpair: socketpair.c
 uds: uds.c
 	$(CC) $(CFLAGS) -o $@ $<
 
+.PHONY: udsd
+## Compile unix domain socket
+udsd: udsd.c
+	$(CC) $(CFLAGS) -o $@ $<
+
 .PHONY: tcp
 ## Compile tcp
 tcp: tcp.c
@@ -60,6 +65,11 @@ tcp: tcp.c
 .PHONY: udp
 ## Compile udp
 udp: udp.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+.PHONY: udpcs
+## Compile udp
+udpcs: udpcs.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 .PHONY: shm

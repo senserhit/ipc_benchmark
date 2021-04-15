@@ -16,7 +16,7 @@ int
 main(int argc, char *argv[]) {
     int              pipefd[2] = {0};
 
-    int              i, size, count, sum, n;
+    long              i, size, count, sum, n;
     char            *buf;
     struct timeval   begin, end;
 
@@ -52,7 +52,7 @@ main(int argc, char *argv[]) {
         }
 
         if (sum != count * size) {
-            fprintf(stderr, "sum error: %d != %d\n", sum, count * size);
+            fprintf(stderr, "sum error: %ld != %ld\n", sum, count * size);
             return 1;
         }
 
@@ -68,9 +68,11 @@ main(int argc, char *argv[]) {
         gettimeofday(&end, NULL);
 
         double tm = getdetlatimeofday(&begin, &end);
-        printf("%.0fMB/s %.0fmsg/s\n",
-            count * size * 1.0 / (tm * 1024 * 1024),
-            count * 1.0 / tm);
+        printf("duration %lf\n", tm);
+        printf("%.0fMB/s  %.0fMbps %.0fmsg/s\n",
+            (long)count * size * 1.0 / (tm * 1024 * 1024),
+            (long)count * size * 1.0 * 8 / (tm * 1024 * 1024),
+            (long)count * 1.0 / tm);
     }
 
     return 0;

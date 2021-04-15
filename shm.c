@@ -69,7 +69,7 @@ int main(int argc, char const *argv[])
     pid_t pid;
     int sem_id;
     int shm_id;
-    int count, i, size;
+    long count, i, size;
     struct timeval begin, end;
 
     if (argc != 3)
@@ -162,9 +162,11 @@ int main(int argc, char const *argv[])
         gettimeofday(&end, NULL);
 
         double tm = getdetlatimeofday(&begin, &end);
-        printf("%fMB/s %fmsg/s\n",
-               count * size * 1.0 / (tm * 1024 * 1024),
-               count * 1.0 / tm);
+        printf("duration %lf\n", tm);
+        printf("%.0fMB/s  %.0fMbps %.0fmsg/s\n",
+            (long)count * size * 1.0 / (tm * 1024 * 1024),
+            (long)count * size * 1.0 * 8 / (tm * 1024 * 1024),
+            (long)count * 1.0 / tm);
 
         sem_reserve(sem_id, WRITE_SEM);
         semun dummy = {0};
